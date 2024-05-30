@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Hit Game</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f0f0f0;
+      }
+
+      canvas {
+        border: 1px solid #000;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <script>
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const attacker = { x: 100, y: 200, width: 50, height: 50, color: 'blue' };
+      const target = {
+        x: 600,
+        y: 200,
+        width: 50,
+        height: 50,
+        color: 'red',
+        health: 100,
+      };
+      const damageTexts = [];
+      const damagePerSecond = 1;
+
+      function drawCharacter(character) {
+        ctx.fillStyle = character.color;
+        ctx.fillRect(
+          character.x,
+          character.y,
+          character.width,
+          character.height
+        );
+      }
+
+      function drawDamageText() {
+        damageTexts.forEach((text, index) => {
+          ctx.fillStyle = `rgba(255, 0, 0, ${text.opacity})`;
+          ctx.font = '20px Arial';
+          ctx.fillText(`-${damagePerSecond}`, text.x, text.y);
+          text.y -= 1; // Move the text up
+          text.opacity -= 0.02; // Reduce opacity
+          if (text.opacity <= 0) {
+            damageTexts.splice(index, 1);
+          }
+        });
+      }
+
+      function updateGame() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawCharacter(attacker);
+        drawCharacter(target);
+        drawDamageText();
+      }
+
+      function inflictDamage() {
+        if (target.health > 0) {
+          target.health -= damagePerSecond;
+          damageTexts.push({ x: target.x, y: target.y - 10, opacity: 1 });
+          if (target.health <= 0) {
+            target.health = 0;
+            clearInterval(damageInterval);
+          }
+        }
+      }
+
+      const damageInterval = setInterval(inflictDamage, 1000);
+      setInterval(updateGame, 1000 / 60);
+    </script>
+  </body>
+</html>
